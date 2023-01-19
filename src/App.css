@@ -19,7 +19,9 @@
     justify-content: center;
     background-color: rgb(34, 34, 34);
 }
-
+.pointer{
+    cursor: pointer;
+}
 .board-container {
     width: 600px;
     height: 600px;

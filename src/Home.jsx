@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import './App.css';
+import { auth, db } from './firebase';
+
 
 export default function Home() {
 
+    const history = useHistory();
+    const { currentUser } = auth;
     const [showModal, setShowModal] = useState(false);
 
     const newGameOption = [
@@ -13,6 +18,22 @@ export default function Home() {
 
     function handlePlayOnline() {
         setShowModal(true);
+    }
+
+    async function startOnlineGame(startingPiece) {
+        const member = {
+            uid: currentUser.uid,
+            piece: startingPiece === 'random' ? ['b', 'w'][Math.round(Math.random)] : startingPiece,
+            name: localStorage.getItem('userName'),
+            creator: true
+        }
+        const game = {
+            status: 'waiting',
+            members: [member],
+            gameId: `${Math.random().toString(36).substr(2, 9)}_${Date.now()}`
+        }
+        await db.collection('games').doc(game.gameId).set(game);
+        history.push(`/game/${game.gameId}`);
     }
 
     return (
@@ -39,14 +60,18 @@ export default function Home() {
                     </div>
                     <footer className='card-footer'>
                         {newGameOption.map(({ label, value }) => (
-                            <span className='card-footer-item' key={value}>
+                            <span
+                                className='card-footer-item pointer'
+                                key={value}
+                                onClick={() => startOnlineGame(value)}
+                            >
                                 {label}
                             </span>
                         ))}
                     </footer>
                 </div>
                 <button className='modal-close is-large'
-                onClick={() =>  setShowModal(false)}
+                    onClick={() => setShowModal(false)}
                 ></button>
             </div>
         </>
